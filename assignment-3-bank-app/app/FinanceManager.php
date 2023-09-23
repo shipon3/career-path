@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Auth\Auth;
+use App\Auth\Customer;
 
 class FinanceManager
 {
@@ -13,7 +14,7 @@ class FinanceManager
     {
         $this->fileStorage = $fileStorage;
         $this->transactions = $this->fileStorage->load(Transaction::getModelName());
-        $this->customers = $this->fileStorage->load(Auth::getModelName());
+        $this->customers = $this->fileStorage->load(Customer::getModelName());
     }
     public function deposit(float $amount, string $email)
     {
@@ -32,7 +33,7 @@ class FinanceManager
 
     public function withdraw(float $amount, string $email)
     {
-        if ($this->currentBalance($email) < $amount) {
+        if ($this->remainingBalance($email) < $amount) {
             printf("--------------------------------\n");
             printf("Insufficient balance!\n");
             printf("--------------------------------\n");
@@ -99,12 +100,12 @@ class FinanceManager
             if ($transaction->getEmail() === $email && $transaction->type === TransactionType::DEPOSIT) {
                 $deposit += $transaction->getAmount();
             }
-            // else if ($transaction->getEmail() === $email && $transaction->type === TransactionType::TRANSFER) {
+            // else if ($transaction->getFromEmail() ?? $transaction->getFromEmail() === $email && $transaction->type === TransactionType::TRANSFER) {
             //     $transfer_balance += $transaction->getAmount();
-            // } 
+            // }
             if ($transaction->getEmail() === $email && $transaction->type === TransactionType::WITHDRAW) {
                 // $total = $transaction->getAmount() + $transfer_balance;
-                $withdraw -= $transaction->getAmount();
+                $withdraw += $transaction->getAmount();
             }
         }
         $balance = $deposit - $withdraw;
@@ -120,5 +121,25 @@ class FinanceManager
             }
         }
         printf("--------------------------------\n");
+    }
+
+    public function allTransactions(): void
+    {
+        printf("--------------------------------\n");
+        foreach ($this->transactions as $transaction) {
+            printf("%s - %d\n", $transaction->type->name, $transaction->getAmount());
+        }
+        printf("--------------------------------\n");
+    }
+
+    public function allUsers(): void
+    {
+        printf("--------------------------------\n");
+        printf("---------- User List -----------\n");
+        printf("--------------------------------\n");
+        foreach ($this->customers as $customer) {
+            printf("user name : %s\nEmail : %s\n", $customer->getName(), $customer->getEmail());
+            printf("--------------------------------\n");
+        }
     }
 }

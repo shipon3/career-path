@@ -4,15 +4,11 @@ namespace App\Auth;
 
 use App\Model\Model;
 
-class Auth implements Model
+class Auth
 {
     public string $email;
     public string $password;
 
-    public static function getModelName(): string
-    {
-        return 'customers';
-    }
     public function setEmail(string $email): void
     {
         $this->email = $email;
